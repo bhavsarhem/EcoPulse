@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  PROJECT_ID: ecopulse-498914
+  PROJECT_ID: ecopulse-498916
   REGION: us-central1
 
 jobs:
