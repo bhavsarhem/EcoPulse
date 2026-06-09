@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-bg-primary: #F8F7F4;
+  --color-bg-secondary: #FFFFFF;
+  --color-bg-tertiary: #F0EDE8;
+  --color-accent-primary: #2D6A4F;
+  --color-accent-secondary: #52B788;
+  --color-accent-glow: #95D5B2;
+  --color-surface: #FFFFFF;
+  --color-border: rgba(45, 106, 79, 0.12);
+  --color-text-primary: #1A1A2E;
+  --color-text-secondary: #6B7280;
+  
+  --color-danger: #E74C3C;
+  --color-warning: #F39C12;
+  --color-success: #27AE60;
+
+  --background: var(--color-bg-primary);
+  --foreground: var(--color-text-primary);
+}
+
+.dark {
+  --color-bg-primary: #0D1117;
+  --color-bg-secondary: #161B22;
+  --color-bg-tertiary: #21262D;
+  --color-accent-primary: #52B788;
+  --color-accent-secondary: #95D5B2;
+  --color-accent-glow: #2D6A4F;
+  --color-surface: #161B22;
+  --color-border: rgba(82, 183, 136, 0.15);
+  --color-text-primary: #E6EDF3;
+  --color-text-secondary: #8B949E;
+  
+  --color-danger: #E74C3C;
+  --color-warning: #F39C12;
+  --color-success: #2E7D32;
+
+  --background: var(--color-bg-primary);
+  --foreground: var(--color-text-primary);
+}
+
+body {
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-primary);
+  font-family: var(--font-dm-sans), sans-serif;
+  transition: background-color 0.300s ease, color 0.300s ease, border-color 0.300s ease;
+}
+
+/* Custom Glassmorphism style */
+.glass-card {
+  background: rgba(var(--color-bg-secondary), 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border);
+}
+
+/* Animations */
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.05);
+  }
+}
+
+.pulse-glow {
+  animation: pulseGlow 2s infinite ease-in-out;
+}
+
+/* CSS-only floating leaves for Login screen */
+.leaf-particle {
+  position: absolute;
+  pointer-events: none;
+  background: var(--color-accent-secondary);
+  border-radius: 0 100% 0 100%;
+  opacity: 0.15;
+  animation: floatLeaf 12s infinite linear;
+}
+
+@keyframes floatLeaf {
+  0% {
+    transform: translateY(105vh) translateX(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(50vh) translateX(50px) rotate(180deg);
+  }
+  100% {
+    transform: translateY(-5vh) translateX(-50px) rotate(360deg);
+  }
+}
