@@ -30,9 +30,9 @@ export default function SidebarLayout({ children, session }: SidebarLayoutProps)
 
   const navItems = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { name: "Scan Photo", href: "/dashboard/scan", icon: Camera },
-    { name: "Scan History", href: "/dashboard/history", icon: History },
-    { name: "Settings", href: "/dashboard/settings", icon: Settings }
+    { name: "Scan Photo", href: "/scan", icon: Camera },
+    { name: "Scan History", href: "/history", icon: History },
+    { name: "Settings", href: "/settings", icon: Settings }
   ];
 
   return (

@@ -118,7 +118,7 @@ export default function DashboardPage() {
           </p>
         </div>
         <Link
-          href="/dashboard/scan"
+          href="/scan"
           className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-accent-primary text-white font-semibold text-sm hover:bg-accent-primary/95 transition-all shadow-md shadow-accent-primary/10"
         >
           <PlusCircle className="w-4 h-4" />
@@ -294,7 +294,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between mb-6">
               <h3 className="font-display font-bold text-lg">Recent Activities</h3>
               <Link
-                href="/dashboard/history"
+                href="/history"
                 className="text-xs font-semibold text-accent-primary dark:text-accent-secondary flex items-center gap-1 hover:underline"
               >
                 View timeline
@@ -338,7 +338,7 @@ export default function DashboardPage() {
           </div>
 
           <Link
-            href="/dashboard/scan"
+            href="/scan"
             className="mt-6 w-full flex items-center justify-center gap-2 px-4 py-3 bg-bg-tertiary hover:bg-bg-tertiary/80 text-text-primary rounded-2xl text-xs font-semibold transition-all"
           >
             <History className="w-4 h-4 text-text-secondary" />
