@@ -18,7 +18,9 @@ async def get_monthly_report(
         report = report_gen.generate_monthly_report(user_id, month)
         return report
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to generate monthly report: {str(e)}"
+            detail="Failed to generate monthly report due to an internal server error."
         )

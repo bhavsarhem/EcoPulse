@@ -25,11 +25,50 @@ class BigQueryPipeline:
         if self.use_bq:
             try:
                 self.client = bigquery.Client(project=os.getenv("GCP_PROJECT_ID"))
+                self.create_dataset_and_table_if_not_exists()
             except Exception as e:
                 print(f"Failed to initialize BQ Client: {e}. Falling back to local storage.")
                 self.use_bq = False
         
         ensure_db_exists()
+
+    def create_dataset_and_table_if_not_exists(self):
+        """Auto-creates the BigQuery dataset and table if they do not exist."""
+        try:
+            # 1. Create dataset if not exists
+            dataset_id = f"{self.client.project}.{self.dataset}"
+            try:
+                self.client.get_dataset(dataset_id)
+            except Exception:
+                dataset = bigquery.Dataset(dataset_id)
+                dataset.location = os.getenv("VERTEX_AI_LOCATION", "US")
+                self.client.create_dataset(dataset, timeout=30)
+                print(f"Created BigQuery dataset {dataset_id} in {dataset.location}")
+                
+            # 2. Create table if not exists
+            table_id = f"{dataset_id}.{self.table}"
+            try:
+                self.client.get_table(table_id)
+            except Exception:
+                schema = [
+                    bigquery.SchemaField("scan_id", "STRING", mode="REQUIRED"),
+                    bigquery.SchemaField("user_id", "STRING", mode="REQUIRED"),
+                    bigquery.SchemaField("scan_timestamp", "TIMESTAMP", mode="REQUIRED"),
+                    bigquery.SchemaField("scan_type", "STRING", mode="REQUIRED"),
+                    bigquery.SchemaField("total_co2e_kg", "FLOAT", mode="REQUIRED"),
+                    bigquery.SchemaField("carbon_tier", "STRING", mode="REQUIRED"),
+                    bigquery.SchemaField("items", "STRING", mode="REQUIRED"),
+                    bigquery.SchemaField("image_gcs_uri", "STRING", mode="NULLABLE"),
+                    bigquery.SchemaField("model_version", "STRING", mode="NULLABLE"),
+                    bigquery.SchemaField("green_alternatives", "STRING", mode="NULLABLE"),
+                    bigquery.SchemaField("explanation", "STRING", mode="NULLABLE"),
+                ]
+                table = bigquery.Table(table_id, schema=schema)
+                self.client.create_table(table, timeout=30)
+                print(f"Created BigQuery table {table_id}")
+        except Exception as e:
+            print(f"Failed to auto-create BigQuery schema: {e}")
+
 
     def save_scan_result(self, result: Dict[str, Any]) -> bool:
         """Saves a scan result. Fallback to local file if BQ is unavailable."""

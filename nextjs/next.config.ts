@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
         { key: "Permissions-Policy", value: "camera=(self), microphone=()" },
         {
           key: "Content-Security-Policy",
-          value: "default-src 'self'; img-src 'self' blob: data: storage.googleapis.com https://api.dicebear.com; connect-src 'self' *.googleapis.com http://localhost:8000; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
+          value: "default-src 'self'; img-src 'self' blob: data: storage.googleapis.com https://api.dicebear.com; connect-src 'self' *.googleapis.com; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
         }
       ]
     }

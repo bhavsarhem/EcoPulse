@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
+import crypto from "crypto";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -9,6 +10,15 @@ export async function GET(req: NextRequest) {
   }
   
   const userId = (session.user as any).id || "dev-user";
+  const timestamp = Date.now().toString();
+  const secret = process.env.INTERNAL_API_SECRET || "";
+  
+  // Calculate signature
+  const message = `${userId}:${timestamp}`;
+  const signature = crypto
+    .createHmac("sha256", secret)
+    .update(message)
+    .digest("hex");
 
   try {
     const pythonApiUrl = process.env.PYTHON_API_URL || "http://localhost:8000";
@@ -16,6 +26,8 @@ export async function GET(req: NextRequest) {
       method: "GET",
       headers: {
         "Authorization": `Bearer ${userId}`,
+        "X-Signature": signature,
+        "X-Timestamp": timestamp,
       },
     });
     
@@ -46,12 +58,24 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: "Missing scanId parameter" }, { status: 400 });
   }
 
+  const timestamp = Date.now().toString();
+  const secret = process.env.INTERNAL_API_SECRET || "";
+  
+  // Calculate signature
+  const message = `${userId}:${timestamp}`;
+  const signature = crypto
+    .createHmac("sha256", secret)
+    .update(message)
+    .digest("hex");
+
   try {
     const pythonApiUrl = process.env.PYTHON_API_URL || "http://localhost:8000";
     const response = await fetch(`${pythonApiUrl}/api/history/${scanId}`, {
       method: "DELETE",
       headers: {
         "Authorization": `Bearer ${userId}`,
+        "X-Signature": signature,
+        "X-Timestamp": timestamp,
       },
     });
     

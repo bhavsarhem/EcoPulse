@@ -53,10 +53,11 @@ async def scan_image(
         return analysis
         
     except Exception as e:
-        print(f"Scanning failed: {e}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to scan image: {str(e)}"
+            detail="Failed to scan image due to an internal server error."
         )
 
 @router.get("/history", response_model=List[ScanResult])
@@ -65,9 +66,11 @@ async def get_history(user_id: str = Depends(get_current_user)):
         scans = db_pipeline.get_user_scans(user_id)
         return scans
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve history: {str(e)}"
+            detail="Failed to retrieve history due to an internal server error."
         )
 
 @router.delete("/history/{scan_id}")
@@ -83,7 +86,9 @@ async def delete_history(scan_id: str, user_id: str = Depends(get_current_user))
     except Exception as e:
         if isinstance(e, HTTPException):
             raise e
+        import traceback
+        traceback.print_exc()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to delete record: {str(e)}"
+            detail="Failed to delete record due to an internal server error."
         )

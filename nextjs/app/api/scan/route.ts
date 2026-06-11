@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
+import crypto from "crypto";
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -9,6 +10,15 @@ export async function POST(req: NextRequest) {
   }
   
   const userId = (session.user as any).id || "dev-user";
+  const timestamp = Date.now().toString();
+  const secret = process.env.INTERNAL_API_SECRET || "";
+  
+  // Calculate request integrity signature using HMAC-SHA256
+  const message = `${userId}:${timestamp}`;
+  const signature = crypto
+    .createHmac("sha256", secret)
+    .update(message)
+    .digest("hex");
 
   try {
     const formData = await req.formData();
@@ -18,6 +28,8 @@ export async function POST(req: NextRequest) {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${userId}`,
+        "X-Signature": signature,
+        "X-Timestamp": timestamp,
       },
       body: formData,
     });

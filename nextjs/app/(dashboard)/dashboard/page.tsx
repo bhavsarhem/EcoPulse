@@ -36,16 +36,21 @@ export default function DashboardPage() {
         setLoading(true);
         setError(null);
         
-        // Fetch report
-        const reportRes = await fetch("/api/report");
-        if (!reportRes.ok) throw new Error("Failed to load carbon stats.");
-        const reportData = await reportRes.json();
-        setReport(reportData);
+        // Fetch report and history in parallel
+        const [reportRes, scansRes] = await Promise.all([
+          fetch("/api/report"),
+          fetch("/api/history")
+        ]);
 
-        // Fetch history
-        const scansRes = await fetch("/api/history");
+        if (!reportRes.ok) throw new Error("Failed to load carbon stats.");
         if (!scansRes.ok) throw new Error("Failed to load scan history.");
-        const scansData = await scansRes.json();
+
+        const [reportData, scansData] = await Promise.all([
+          reportRes.json(),
+          scansRes.json()
+        ]);
+
+        setReport(reportData);
         setScans(scansData.slice(0, 5)); // Get top 5 recent scans
         
       } catch (err: any) {

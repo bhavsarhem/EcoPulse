@@ -20,7 +20,8 @@ class GeminiClient:
         
         if not self.mock_mode and HAS_GENAI and self.api_key:
             genai.configure(api_key=self.api_key)
-            self.model = genai.GenerativeModel('gemini-2.0-flash')
+            model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+            self.model = genai.GenerativeModel(model_name)
         else:
             self.mock_mode = True
 
