@@ -1,33 +1,9 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { useState } from "react";
-import { Leaf, Sparkles, LogIn } from "lucide-react";
+import { Leaf, Sparkles } from "lucide-react";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("dev@ecopulse.org");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleDevLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await signIn("credentials", {
-        email,
-        callbackUrl: "/dashboard",
-      });
-      if (res?.error) {
-        setError(res.error);
-      }
-    } catch (err: any) {
-      setError(err.message || "An authentication error occurred");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleGoogleLogin = () => {
     signIn("google", { callbackUrl: "/dashboard" });
   };
@@ -47,29 +23,28 @@ export default function LoginPage() {
       {/* Login Card */}
       <div className="w-full max-w-md glass-card rounded-3xl p-8 shadow-2xl relative z-10 transition-all">
         {/* Logo and header */}
-        <div className="flex flex-col items-center text-center mb-8">
+        <div className="flex flex-col items-center text-center mb-10">
           <div className="p-3.5 bg-accent-primary text-bg-secondary rounded-2xl shadow-lg shadow-accent-primary/20 mb-4">
             <Leaf className="w-8 h-8 animate-pulse" />
           </div>
-          <h2 className="font-display font-extrabold text-3xl tracking-tight text-text-primary">
+          <h1 className="font-display font-extrabold text-3xl tracking-tight text-text-primary">
             EcoPulse
-          </h2>
-          <p className="text-sm text-text-secondary mt-1">
+          </h1>
+          <p className="text-sm text-text-secondary mt-2">
             Your footprint. Simplified.
           </p>
         </div>
 
-        {error && (
-          <div className="p-3 bg-danger/10 border border-danger/20 text-danger rounded-xl text-xs mb-6 text-center">
-            {error}
-          </div>
-        )}
+        <p className="text-center text-text-secondary text-sm mb-6">
+          Sign in to track your environmental impact and receive personalised eco-insights.
+        </p>
 
         {/* Google Authentication Button */}
         <button
           onClick={handleGoogleLogin}
           type="button"
-          className="w-full flex items-center justify-center gap-3 px-6 py-3.5 rounded-full border border-border bg-bg-secondary text-text-primary font-semibold text-sm hover:bg-bg-tertiary hover:border-text-primary/30 transition-all shadow-sm mb-6"
+          id="google-signin-btn"
+          className="w-full flex items-center justify-center gap-3 px-6 py-3.5 rounded-full border border-border bg-bg-secondary text-text-primary font-semibold text-sm hover:bg-bg-tertiary hover:border-text-primary/30 transition-all shadow-sm"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path
@@ -92,50 +67,9 @@ export default function LoginPage() {
           Continue with Google
         </button>
 
-        {/* Divider */}
-        <div className="flex items-center gap-3 mb-6">
-          <div className="h-[1px] bg-border/50 flex-grow" />
-          <span className="text-xs text-text-secondary uppercase tracking-widest font-mono">
-            Or Dev Mode
-          </span>
-          <div className="h-[1px] bg-border/50 flex-grow" />
-        </div>
-
-        {/* Developer Login Mode */}
-        <form onSubmit={handleDevLogin} className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold text-text-secondary uppercase tracking-wider font-mono mb-2">
-              Developer Profile Email
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-5 py-3 rounded-full border border-border bg-bg-primary text-text-primary text-sm focus:outline-none focus:border-accent-primary transition-all font-body"
-              required
-              placeholder="e.g. dev-user@ecopulse.org"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-accent-primary text-white hover:bg-accent-primary/95 font-semibold text-sm transition-all disabled:opacity-55 shadow-md shadow-accent-primary/10"
-          >
-            {loading ? (
-              <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            ) : (
-              <>
-                <LogIn className="w-4 h-4" />
-                Launch Developer Mode
-              </>
-            )}
-          </button>
-        </form>
-
         <div className="mt-8 pt-6 border-t border-border/50 flex items-center justify-center gap-1.5 text-xs text-text-secondary font-mono">
           <Sparkles className="w-3.5 h-3.5 text-accent-secondary" />
-          Offline Sandboxed Mode Active
+          Secured with Google OAuth 2.0
         </div>
       </div>
     </div>
