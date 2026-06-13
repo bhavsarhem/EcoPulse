@@ -132,9 +132,9 @@ export default function ScanPage() {
     <div className="space-y-8 max-w-4xl mx-auto">
       {/* Title */}
       <div>
-        <h1 className="font-display text-3xl font-extrabold tracking-tight">AI Carbon Scanner</h1>
+        <h1 className="font-display text-3xl font-extrabold tracking-tight">Carbon Scanner</h1>
         <p className="text-text-secondary text-sm font-body mt-1">
-          Select scan mode, then take a photo or drag-and-drop a file to extract CO₂e metrics.
+          Select scan mode, then take a photo or drag-and-drop a file to extract CO₂e metrics and reduce carbon emission with the help of AI.
         </p>
       </div>
 
@@ -379,7 +379,7 @@ export default function ScanPage() {
               <div>
                 <h4 className="font-display font-bold">Scanning in Progress</h4>
                 <p className="text-xs text-text-secondary mt-1 max-w-[200px] leading-relaxed font-body">
-                  Vertex AI Gemini is extracting food ingredients and checking IPCC databases...
+                  Gemini is extracting food ingredients and checking IPCC databases...
                 </p>
               </div>
             </div>

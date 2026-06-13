@@ -75,28 +75,85 @@ class GeminiClient:
             validated_items = []
             total_co2e = 0.0
             for item in data.get("items", []):
+                name = str(item.get("name", "Unknown Item"))
+                quantity = str(item.get("estimated_quantity", "1 unit"))
+                
+                category = item.get("category", "goods")
+                if category not in ["food", "transport", "goods", "energy"]:
+                    category = "goods"
+                    
                 confidence = item.get("confidence", "medium")
-                co2e = float(item.get("co2e_kg", 0.0))
+                if confidence not in ["high", "medium", "low"]:
+                    confidence = "medium"
+                    
+                data_source = str(item.get("data_source", "estimated"))
+                
+                try:
+                    co2e = float(item.get("co2e_kg", 0.0))
+                except (ValueError, TypeError):
+                    co2e = 0.0
                 
                 # If Gemini is unsure, fallback to local lookup calculation
                 if confidence == "low" or co2e <= 0.0:
                     co2e = estimate_item_co2e(
-                        item.get("name", ""),
-                        item.get("estimated_quantity", "1 unit"),
-                        item.get("category", "goods")
+                        name,
+                        quantity,
+                        category
                     )
-                    item["co2e_kg"] = co2e
-                    item["data_source"] = "local_database_fallback"
-                    item["confidence"] = "medium"
+                    data_source = "local_database_fallback"
+                    confidence = "medium"
                     
-                validated_items.append(item)
+                validated_items.append({
+                    "name": name,
+                    "estimated_quantity": quantity,
+                    "co2e_kg": co2e,
+                    "confidence": confidence,
+                    "category": category,
+                    "data_source": data_source
+                })
                 total_co2e += co2e
+
+            response_scan_type = data.get("scan_type", scan_type)
+            if response_scan_type not in ["meal", "receipt", "product_label"]:
+                response_scan_type = scan_type
                 
-            data["items"] = validated_items
-            data["total_co2e_kg"] = round(total_co2e, 2)
-            data["carbon_tier"] = calculate_tier(total_co2e)
+            explanation = str(data.get("explanation", "No explanation provided."))
             
-            return data
+            green_alts = []
+            for alt in data.get("green_alternatives", []):
+                swap = str(alt.get("swap", ""))
+                try:
+                    savings = float(alt.get("savings_co2e_kg", 0.0))
+                except (ValueError, TypeError):
+                    savings = 0.0
+                reason = str(alt.get("reason", ""))
+                if swap:
+                    green_alts.append({
+                        "swap": swap,
+                        "savings_co2e_kg": round(savings, 2),
+                        "reason": reason
+                    })
+                    
+            if not green_alts:
+                green_alts.append({
+                    "swap": "Choose local, minimally-packaged alternatives",
+                    "savings_co2e_kg": round(total_co2e * 0.1, 2),
+                    "reason": "Reduces transportation and packaging emissions."
+                })
+                
+            final_data = {
+                "scan_id": f"scan-{random.randint(100000, 999999)}",
+                "user_id": data.get("user_id", ""),
+                "scan_timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "scan_type": response_scan_type,
+                "items": validated_items,
+                "total_co2e_kg": round(total_co2e, 2),
+                "green_alternatives": green_alts,
+                "carbon_tier": calculate_tier(total_co2e),
+                "explanation": explanation
+            }
+            
+            return final_data
             
         except Exception as e:
             print(f"Gemini live call error: {e}. Falling back to mock data.")

@@ -21,8 +21,19 @@ export async function POST(req: NextRequest) {
     .digest("hex");
 
   try {
-    const formData = await req.formData();
-    const pythonApiUrl = process.env.PYTHON_API_URL || "http://localhost:8000";
+    const incomingFormData = await req.formData();
+    const formData = new FormData();
+    for (const [key, value] of incomingFormData.entries()) {
+      if (value instanceof Blob) {
+        const arrayBuffer = await value.arrayBuffer();
+        const freshBlob = new Blob([arrayBuffer], { type: value.type });
+        const fileName = (value as any).name || "file.jpg";
+        formData.append(key, freshBlob, fileName);
+      } else {
+        formData.append(key, value);
+      }
+    }
+    const pythonApiUrl = process.env.PYTHON_API_URL || "http://127.0.0.1:8000";
     
     const response = await fetch(`${pythonApiUrl}/api/scan`, {
       method: "POST",

@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+html::-webkit-scrollbar {
+  display: none;
+}
+
 :root {
   --color-bg-primary: #F8F7F4;
   --color-bg-secondary: #FFFFFF;
@@ -47,6 +56,18 @@ body {
   background-color: var(--color-bg-primary);
   font-family: var(--font-dm-sans), sans-serif;
   transition: background-color 0.300s ease, color 0.300s ease, border-color 0.300s ease;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+body::-webkit-scrollbar {
+  display: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+}
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 /* Custom Glassmorphism style */

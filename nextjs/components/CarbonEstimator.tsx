@@ -24,6 +24,40 @@ const TRANSPORT_FACTORS: Record<TransportType, number> = {
 const ELECTRICITY_FACTOR = 0.4; // kg CO2e per kWh
 const BENCHMARK_DAILY_CO2E = 13.0;
 
+// Easing hook for fluid counter animations
+function useAnimatedNumber(targetValue: number, duration: number = 350) {
+  const [currentValue, setCurrentValue] = useState(targetValue);
+  
+  useEffect(() => {
+    let start: number | null = null;
+    const startValue = currentValue;
+    const diff = targetValue - startValue;
+    
+    if (diff === 0) return;
+    
+    let animationFrameId: number;
+    
+    const step = (timestamp: number) => {
+      if (!start) start = timestamp;
+      const progress = Math.min((timestamp - start) / duration, 1);
+      // Easing out quad
+      const easeProgress = progress * (2 - progress);
+      const nextVal = startValue + diff * easeProgress;
+      
+      setCurrentValue(nextVal);
+      
+      if (progress < 1) {
+        animationFrameId = requestAnimationFrame(step);
+      }
+    };
+    
+    animationFrameId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [targetValue]);
+  
+  return currentValue;
+}
+
 export default function CarbonEstimator() {
   // Estimator States
   const [diet, setDiet] = useState<DietType>("balanced");
@@ -35,6 +69,12 @@ export default function CarbonEstimator() {
   const [monthlyFootprint, setMonthlyFootprint] = useState<number>(0);
   const [comparison, setComparison] = useState<number>(0); // percent difference vs 13kg/day
   const [treesRequired, setTreesRequired] = useState<number>(0); // trees to offset per year
+
+  // Animated counterparts for a polished user experience
+  const animatedDaily = useAnimatedNumber(dailyFootprint, 350);
+  const animatedMonthly = useAnimatedNumber(monthlyFootprint, 350);
+  const animatedTrees = useAnimatedNumber(treesRequired, 350);
+  const animatedComparison = useAnimatedNumber(comparison, 350);
 
   useEffect(() => {
     // Calculations
@@ -84,13 +124,13 @@ export default function CarbonEstimator() {
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {(["vegan", "vegetarian", "balanced", "meat"] as DietType[]).map((type) => {
-                  const icons = { vegan: "🌱", vegetarian: "🥚", balanced: "🍽️", meat: "🥩" };
+                  const icons = { vegan: "🌱", vegetarian: "🥦", balanced: "🍽️", meat: "🥩" };
                   return (
                     <button
                       key={type}
                       type="button"
                       onClick={() => setDiet(type)}
-                      className={`px-3 py-3.5 rounded-2xl border text-xs font-bold capitalize transition-all duration-200 flex flex-col items-center gap-1.5 ${
+                      className={`px-3 py-3.5 rounded-2xl border text-xs font-bold capitalize transition-all duration-200 flex flex-col items-center gap-1.5 hover:scale-[1.03] active:scale-[0.97] ${
                         diet === type
                           ? "bg-accent-primary border-accent-primary text-white shadow-md shadow-accent-primary/20"
                           : "border-border hover:border-accent-primary/30 hover:bg-bg-tertiary/20 text-text-secondary hover:text-text-primary"
@@ -104,7 +144,7 @@ export default function CarbonEstimator() {
               </div>
               <p className="text-[10px] text-text-secondary italic font-body pl-6">
                 {diet === "vegan" && "Purely plant-based diet. Leaves the lowest possible agricultural footprint."}
-                {diet === "vegetarian" && "No meat, but includes dairy and eggs. Moderate environmental impact."}
+                {diet === "vegetarian" && "No meat, but includes dairy and vegetables. Moderate environmental impact."}
                 {diet === "balanced" && "Average poultry, fish, and red meat intake. Typical diet metrics."}
                 {diet === "meat" && "High consumption of beef and lamb. High agricultural methane footprint."}
               </p>
@@ -125,7 +165,7 @@ export default function CarbonEstimator() {
                       key={type}
                       type="button"
                       onClick={() => setTransport(type)}
-                      className={`px-3 py-3.5 rounded-2xl border text-xs font-bold capitalize transition-all duration-200 flex flex-col items-center gap-1.5 ${
+                      className={`px-3 py-3.5 rounded-2xl border text-xs font-bold capitalize transition-all duration-200 flex flex-col items-center gap-1.5 hover:scale-[1.03] active:scale-[0.97] ${
                         transport === type
                           ? "bg-accent-primary border-accent-primary text-white shadow-md shadow-accent-primary/20"
                           : "border-border hover:border-accent-primary/30 hover:bg-bg-tertiary/20 text-text-secondary hover:text-text-primary"
@@ -212,7 +252,7 @@ export default function CarbonEstimator() {
 
             <div className="flex items-baseline gap-2">
               <span className="font-mono text-6xl font-extrabold tracking-tight text-accent-primary dark:text-accent-secondary">
-                {dailyFootprint}
+                {animatedDaily.toFixed(1)}
               </span>
               <span className="text-sm font-semibold text-text-secondary font-mono">kg CO₂e / day</span>
             </div>
@@ -222,7 +262,7 @@ export default function CarbonEstimator() {
               <div className="flex items-center justify-between text-[11px] font-bold font-mono text-text-secondary mb-1.5">
                 <span>Standard Benchmark: {BENCHMARK_DAILY_CO2E} kg</span>
                 <span className={comparison <= 0 ? "text-success" : "text-danger"}>
-                  {comparison <= 0 ? `${Math.abs(comparison)}% Lower` : `+${comparison}% Higher`}
+                  {comparison <= 0 ? `${Math.abs(Math.round(animatedComparison))}% Lower` : `+${Math.round(animatedComparison)}% Higher`}
                 </span>
               </div>
 
@@ -232,7 +272,7 @@ export default function CarbonEstimator() {
                   className={`h-full rounded-full transition-all duration-500 ${
                     comparison <= 0 ? "bg-success" : "bg-danger"
                   }`}
-                  style={{ width: `${Math.min((dailyFootprint / 20.0) * 100, 100)}%` }}
+                  style={{ width: `${Math.min((animatedDaily / 20.0) * 100, 100)}%` }}
                 />
               </div>
             </div>
@@ -247,7 +287,7 @@ export default function CarbonEstimator() {
               <div>
                 <h4 className="font-bold text-text-primary">Offset Requirements</h4>
                 <p className="text-text-secondary mt-0.5 leading-relaxed font-body">
-                  Requires planting <span className="font-mono font-bold text-accent-primary dark:text-accent-secondary">{treesRequired} mature trees</span> annually to offset your usage.
+                  Requires planting <span className="font-mono font-bold text-accent-primary dark:text-accent-secondary">{Math.round(animatedTrees)} mature trees</span> annually to offset your usage.
                 </p>
               </div>
             </div>
@@ -259,7 +299,7 @@ export default function CarbonEstimator() {
               <div>
                 <h4 className="font-bold text-text-primary">Monthly Total</h4>
                 <p className="text-text-secondary mt-0.5 leading-relaxed font-body">
-                  Accumulates to approximately <span className="font-mono font-bold text-text-primary">{monthlyFootprint} kg CO₂e</span> per month.
+                  Accumulates to approximately <span className="font-mono font-bold text-text-primary">{Math.round(animatedMonthly)} kg CO₂e</span> per month.
                 </p>
               </div>
             </div>

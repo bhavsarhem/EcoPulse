@@ -1,93 +1,108 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 
 export default function CursorGlow() {
-  const [position, setPosition] = useState({ x: -100, y: -100 });
-  const [trail, setTrail] = useState({ x: -100, y: -100 });
-  const [angle, setAngle] = useState(0);
-  const [visible, setVisible] = useState(false);
-  const [isMoving, setIsMoving] = useState(false);
+  const trailRef = useRef<HTMLDivElement>(null);
+  const dotRef = useRef<HTMLDivElement>(null);
+  const glowRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const trailEl = trailRef.current;
+    const dotEl = dotRef.current;
+    const glowEl = glowRef.current;
+
+    if (!trailEl || !dotEl || !glowEl) return;
+
+    let mouseX = -100;
+    let mouseY = -100;
+    let trailX = -100;
+    let trailY = -100;
+    let currentAngle = 0;
+    let isMoving = false;
     let moveTimeout: NodeJS.Timeout;
 
-    const handleMouseMove = (e: MouseEvent) => {
-      setPosition({ x: e.clientX, y: e.clientY });
-      setVisible(true);
-      setIsMoving(true);
+    // Set initial styles for hiding
+    trailEl.style.opacity = "0";
+    dotEl.style.opacity = "0";
+    glowEl.style.opacity = "0";
 
-      // Stop scaling/tilting when mouse stops moving
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+
+      // Make visible on move
+      trailEl.style.opacity = "1";
+      dotEl.style.opacity = "1";
+      glowEl.style.opacity = "1";
+
+      isMoving = true;
+
+      // Position the core dot immediately
+      dotEl.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0) translate(-50%, -50%)`;
+
       clearTimeout(moveTimeout);
       moveTimeout = setTimeout(() => {
-        setIsMoving(false);
+        isMoving = false;
       }, 150);
     };
 
     const handleMouseLeave = () => {
-      setVisible(false);
+      trailEl.style.opacity = "0";
+      dotEl.style.opacity = "0";
+      glowEl.style.opacity = "0";
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
     document.addEventListener("mouseleave", handleMouseLeave);
+
+    let animationFrameId: number;
+
+    const tick = () => {
+      const dx = mouseX - trailX;
+      const dy = mouseY - trailY;
+
+      // Smoothly interpolate trail coordinates
+      trailX += dx * 0.12;
+      trailY += dy * 0.12;
+
+      // Position the ambient glow and the leaf trail
+      glowEl.style.transform = `translate3d(${trailX}px, ${trailY}px, 0) translate(-50%, -50%)`;
+
+      if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+        // Target angle based on direction, aligned offset 45 deg
+        const targetAngle = Math.atan2(dy, dx) * (180 / Math.PI) + 45;
+
+        // Interpolate angle smoothly
+        let diff = targetAngle - currentAngle;
+        while (diff < -180) diff += 360;
+        while (diff > 180) diff -= 360;
+        currentAngle += diff * 0.12;
+      }
+
+      const scale = isMoving ? 1.15 : 0.95;
+      trailEl.style.transform = `translate3d(${trailX}px, ${trailY}px, 0) translate(-50%, -50%) rotate(${currentAngle}deg) scale(${scale})`;
+
+      animationFrameId = requestAnimationFrame(tick);
+    };
+
+    animationFrameId = requestAnimationFrame(tick);
 
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseleave", handleMouseLeave);
       clearTimeout(moveTimeout);
-    };
-  }, []);
-
-  useEffect(() => {
-    let animationFrameId: number;
-
-    const updateTrail = () => {
-      setTrail((prev) => {
-        const dx = position.x - prev.x;
-        const dy = position.y - prev.y;
-
-        // Calculate direction angle when the mouse is moving
-        if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
-          // Add 45 deg to align the diagonal SVG leaf graphic along the movement vector
-          const targetAngle = Math.atan2(dy, dx) * (180 / Math.PI) + 45;
-          
-          setAngle((prevAngle) => {
-            // Normalize angle boundary transitions
-            let diff = targetAngle - prevAngle;
-            while (diff < -180) diff += 360;
-            while (diff > 180) diff -= 360;
-            return prevAngle + diff * 0.12; // smooth interpolation rate
-          });
-        }
-
-        return {
-          x: prev.x + dx * 0.12,
-          y: prev.y + dy * 0.12,
-        };
-      });
-      animationFrameId = requestAnimationFrame(updateTrail);
-    };
-
-    animationFrameId = requestAnimationFrame(updateTrail);
-
-    return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, [position]);
-
-  if (!visible) return null;
+  }, []);
 
   return (
     <>
       {/* Trailing floating leaf vector */}
       <div
-        className="fixed pointer-events-none z-[9999] -translate-x-1/2 -translate-y-1/2 transition-transform duration-75"
-        style={{
-          left: `${trail.x}px`,
-          top: `${trail.y}px`,
-          transform: `translate(-50%, -50%) rotate(${angle}deg) scale(${isMoving ? 1.15 : 0.95})`,
-          transition: "transform 0.150s cubic-bezier(0.25, 0.8, 0.25, 1)",
-        }}
+        ref={trailRef}
+        className="fixed pointer-events-none z-[9999] top-0 left-0 transition-opacity duration-300 ease-out"
+        style={{ willChange: "transform, opacity" }}
       >
         <svg
           viewBox="0 0 24 24"
@@ -115,20 +130,16 @@ export default function CursorGlow() {
 
       {/* Core pointer pointer dot */}
       <div
-        className="fixed w-2 h-2 bg-accent-primary rounded-full pointer-events-none z-[9999] -translate-x-1/2 -translate-y-1/2 shadow-inner"
-        style={{
-          left: `${position.x}px`,
-          top: `${position.y}px`,
-        }}
+        ref={dotRef}
+        className="fixed w-2 h-2 bg-accent-primary rounded-full pointer-events-none z-[9999] top-0 left-0 transition-opacity duration-300 ease-out shadow-inner"
+        style={{ willChange: "transform, opacity" }}
       />
 
       {/* Ambient background blur backing */}
       <div
-        className="fixed w-60 h-60 bg-accent-glow/5 rounded-full blur-[80px] pointer-events-none z-0 -translate-x-1/2 -translate-y-1/2"
-        style={{
-          left: `${trail.x}px`,
-          top: `${trail.y}px`,
-        }}
+        ref={glowRef}
+        className="fixed w-60 h-60 bg-accent-glow/5 rounded-full blur-[80px] pointer-events-none z-0 top-0 left-0 transition-opacity duration-500 ease-out"
+        style={{ willChange: "transform, opacity" }}
       />
     </>
   );

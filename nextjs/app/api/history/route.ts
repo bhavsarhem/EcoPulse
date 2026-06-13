@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
     .digest("hex");
 
   try {
-    const pythonApiUrl = process.env.PYTHON_API_URL || "http://localhost:8000";
+    const pythonApiUrl = process.env.PYTHON_API_URL || "http://127.0.0.1:8000";
     const response = await fetch(`${pythonApiUrl}/api/history`, {
       method: "GET",
       headers: {
@@ -69,7 +69,7 @@ export async function DELETE(req: NextRequest) {
     .digest("hex");
 
   try {
-    const pythonApiUrl = process.env.PYTHON_API_URL || "http://localhost:8000";
+    const pythonApiUrl = process.env.PYTHON_API_URL || "http://127.0.0.1:8000";
     const response = await fetch(`${pythonApiUrl}/api/history/${scanId}`, {
       method: "DELETE",
       headers: {

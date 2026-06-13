@@ -1,5 +1,5 @@
 from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException, status
-from typing import List
+from typing import List, Literal
 from api.middleware.auth_guard import get_current_user
 from api.middleware.rate_limiter import check_rate_limit
 from services.image_preprocessor import preprocess_image
@@ -14,7 +14,7 @@ db_pipeline = BigQueryPipeline()
 @router.post("/scan", response_model=ScanResult)
 async def scan_image(
     file: UploadFile = File(...),
-    scan_type: str = Form("meal"),
+    scan_type: Literal["meal", "receipt", "product_label"] = Form("meal"),
     user_id: str = Depends(get_current_user)
 ):
     # 1. Enforce rate limit

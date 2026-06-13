@@ -21,8 +21,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "EcoPulse - AI Carbon Footprint Tracker",
-  description: "Snap and analyze your carbon footprint from meals, receipts, and labels using Vertex AI Gemini. Built for the clean earth generation.",
+  title: "EcoPulse - Carbon Footprint Tracker",
+  description: "Snap and analyze your carbon footprint from meals, receipts, and labels using Gemini. Built to help you reduce carbon emission with the help of AI.",
 };
 
 export default function RootLayout({
