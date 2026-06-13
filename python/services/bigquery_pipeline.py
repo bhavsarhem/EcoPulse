@@ -85,7 +85,9 @@ class BigQueryPipeline:
                     "carbon_tier": result["carbon_tier"],
                     "items": json.dumps(result["items"]),
                     "image_gcs_uri": result.get("image_gcs_uri", ""),
-                    "model_version": os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+                    "model_version": os.getenv("GEMINI_MODEL", "gemini-2.0-flash"),
+                    "green_alternatives": json.dumps(result.get("green_alternatives", [])),
+                    "explanation": result.get("explanation", "")
                 }
                 errors = self.client.insert_rows_json(table_ref, [row])
                 if not errors:
@@ -112,7 +114,7 @@ class BigQueryPipeline:
         if self.use_bq:
             try:
                 query = f"""
-                    SELECT scan_id, user_id, scan_timestamp, scan_type, total_co2e_kg, carbon_tier, items, image_gcs_uri
+                    SELECT scan_id, user_id, scan_timestamp, scan_type, total_co2e_kg, carbon_tier, items, image_gcs_uri, green_alternatives, explanation
                     FROM `{self.client.project}.{self.dataset}.{self.table}`
                     WHERE user_id = @user_id
                     ORDER BY scan_timestamp DESC
@@ -125,15 +127,28 @@ class BigQueryPipeline:
                 query_job = self.client.query(query, job_config=job_config)
                 results = []
                 for row in query_job:
+                    items_str = row["items"]
+                    items_data = json.loads(items_str) if isinstance(items_str, str) else (items_str if items_str else [])
+                    
+                    alternatives_str = row["green_alternatives"]
+                    alternatives_data = json.loads(alternatives_str) if isinstance(alternatives_str, str) else (alternatives_str if alternatives_str else [])
+                    
+                    explanation_str = row["explanation"] or ""
+                    
+                    ts = row["scan_timestamp"]
+                    ts_str = ts.isoformat() if hasattr(ts, "isoformat") else str(ts)
+                    
                     results.append({
-                        "scan_id": row.scan_id,
-                        "user_id": row.user_id,
-                        "scan_timestamp": row.scan_timestamp.isoformat() if hasattr(row.scan_timestamp, "isoformat") else str(row.scan_timestamp),
-                        "scan_type": row.scan_type,
-                        "total_co2e_kg": row.total_co2e_kg,
-                        "carbon_tier": row.carbon_tier,
-                        "items": json.loads(row.items) if isinstance(row.items, str) else row.items,
-                        "image_gcs_uri": row.image_gcs_uri
+                        "scan_id": row["scan_id"],
+                        "user_id": row["user_id"],
+                        "scan_timestamp": ts_str,
+                        "scan_type": row["scan_type"],
+                        "total_co2e_kg": row["total_co2e_kg"],
+                        "carbon_tier": row["carbon_tier"],
+                        "items": items_data,
+                        "image_gcs_uri": row["image_gcs_uri"],
+                        "green_alternatives": alternatives_data,
+                        "explanation": explanation_str
                     })
                 return results
             except Exception as e:
