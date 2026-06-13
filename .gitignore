@@ -14,6 +14,7 @@ python/.env
 **/*.pyc
 python/.pytest_cache/
 python/data/scans.json
+python/data/blocklist.json
 
 # OS files
 .DS_Store

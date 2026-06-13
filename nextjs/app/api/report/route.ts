@@ -24,6 +24,7 @@ export async function GET(req: NextRequest) {
     .digest("hex");
 
   try {
+    const deviceId = req.cookies.get("device_id")?.value || "";
     const pythonApiUrl = process.env.PYTHON_API_URL || "http://127.0.0.1:8000";
     let url = `${pythonApiUrl}/api/report`;
     if (month) {
@@ -36,6 +37,7 @@ export async function GET(req: NextRequest) {
         "Authorization": `Bearer ${userId}`,
         "X-Signature": signature,
         "X-Timestamp": timestamp,
+        "X-Device-Id": deviceId,
       },
     });
     

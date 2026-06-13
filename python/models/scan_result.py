@@ -18,3 +18,4 @@ class ScanResult(BaseModel):
     carbon_tier: Literal['low', 'medium', 'high', 'very_high']
     explanation: str
     image_gcs_uri: Optional[str] = None
+    is_safe: bool = True

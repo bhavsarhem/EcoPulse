@@ -58,7 +58,7 @@ export default function SidebarLayout({ children, session }: SidebarLayoutProps)
 
       {/* Mobile Slide-out Menu */}
       {mobileOpen && (
-        <div className="md:hidden fixed inset-0 bg-bg-primary/95 z-30 flex flex-col justify-between p-6 transition-all duration-300">
+        <div className="md:hidden fixed inset-0 bg-bg-primary z-30 flex flex-col justify-between p-6 transition-all duration-300">
           <div>
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-2">

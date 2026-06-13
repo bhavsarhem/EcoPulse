@@ -39,6 +39,7 @@ class GeminiClient:
             # Prepare prompts
             system_prompt = (
                 "You are a certified carbon footprint analyst. Analyze the provided image carefully.\n"
+                "CRITICAL SAFETY RULE: Inspect the image for any nudity, human or animal private body parts, vulgar content, gore, violence, or anything else inappropriate for children or women. If the image is inappropriate, set the root-level boolean field 'is_safe' to false, and set 'explanation' to a safety warning explaining the violation. Otherwise, set 'is_safe' to true.\n"
                 "Identify all visible food items, products, or purchase categories.\n"
                 "For each item return:\n"
                 "  - name (string)\n"
@@ -70,6 +71,25 @@ class GeminiClient:
                     cleaned_text = "\n".join(lines[1:-1]).strip()
                     
             data = json.loads(cleaned_text)
+            
+            is_safe = data.get("is_safe", True)
+            if isinstance(is_safe, str):
+                is_safe = is_safe.lower() == "true"
+            is_safe = bool(is_safe)
+            
+            if not is_safe:
+                return {
+                    "scan_id": f"scan-{random.randint(100000, 999999)}",
+                    "user_id": "",
+                    "scan_timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "scan_type": scan_type,
+                    "items": [],
+                    "total_co2e_kg": 0.0,
+                    "green_alternatives": [],
+                    "carbon_tier": "low",
+                    "explanation": str(data.get("explanation", "Inappropriate or NSFW content detected.")),
+                    "is_safe": False
+                }
             
             # Post-validate items and fallback if needed
             validated_items = []
@@ -150,7 +170,8 @@ class GeminiClient:
                 "total_co2e_kg": round(total_co2e, 2),
                 "green_alternatives": green_alts,
                 "carbon_tier": calculate_tier(total_co2e),
-                "explanation": explanation
+                "explanation": explanation,
+                "is_safe": True
             }
             
             return final_data
@@ -229,5 +250,6 @@ class GeminiClient:
             "total_co2e_kg": total_co2e,
             "green_alternatives": selected["green_alternatives"],
             "carbon_tier": calculate_tier(total_co2e),
-            "explanation": selected["explanation"]
+            "explanation": selected["explanation"],
+            "is_safe": True
         }

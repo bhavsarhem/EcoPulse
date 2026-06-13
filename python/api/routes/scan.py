@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException, status
+from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException, status, Request
 from typing import List, Literal
 from api.middleware.auth_guard import get_current_user
 from api.middleware.rate_limiter import check_rate_limit
@@ -13,6 +13,7 @@ db_pipeline = BigQueryPipeline()
 
 @router.post("/scan", response_model=ScanResult)
 async def scan_image(
+    request: Request,
     file: UploadFile = File(...),
     scan_type: Literal["meal", "receipt", "product_label"] = Form("meal"),
     user_id: str = Depends(get_current_user)
@@ -44,6 +45,19 @@ async def scan_image(
         # 5. Analyze image with Gemini
         analysis = gemini_client.analyze_image(processed_bytes, scan_type)
         
+        # Check safety analysis result
+        if not analysis.get("is_safe", True):
+            device_id = request.headers.get("X-Device-Id")
+            if user_id:
+                db_pipeline.block_entity(user_id, reason="NSFW/Inappropriate content upload")
+            if device_id:
+                db_pipeline.block_entity(device_id, reason="NSFW/Inappropriate content upload")
+                
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Inappropriate or NSFW content detected. This account and device have been permanently blocked."
+            )
+            
         # Fill in user metadata
         analysis["user_id"] = user_id
         

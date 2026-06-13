@@ -4,14 +4,21 @@ import hashlib
 import time
 from fastapi import Request, HTTPException, Security
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from services.bigquery_pipeline import BigQueryPipeline
 
 security_bearer = HTTPBearer(auto_error=False)
+db_pipeline = BigQueryPipeline()
 
 async def get_current_user(request: Request, credentials: HTTPAuthorizationCredentials = Security(security_bearer)) -> str:
     """
     Extracts the user ID from the Bearer token and verifies request integrity
     using HMAC-SHA256 signature to ensure only authenticated sources can call the backend.
     """
+    # Check device blocklist
+    device_id = request.headers.get("X-Device-Id")
+    if device_id and db_pipeline.is_entity_blocked(device_id):
+        raise HTTPException(status_code=403, detail="This device has been permanently blocked due to a safety violation.")
+
     if not credentials:
         auth_header = request.headers.get("Authorization")
         if auth_header and auth_header.startswith("Bearer "):
@@ -55,24 +62,29 @@ async def get_current_user(request: Request, credentials: HTTPAuthorizationCrede
     # 2. Extract and return the user ID after the signature is validated
     # If MOCK_MODE is true, return the token (potentially prepending dev-)
     if token.startswith("dev-") or os.getenv("MOCK_MODE", "true").lower() == "true":
-        return token if token.startswith("dev-") else f"dev-{token}"
-
-    # Production Firebase authentication
-    try:
-        import firebase_admin
-        from firebase_admin import auth
-        
-        if not firebase_admin._apps:
-            firebase_admin.initialize_app()
+        user_id = token if token.startswith("dev-") else f"dev-{token}"
+    else:
+        # Production Firebase authentication
+        try:
+            import firebase_admin
+            from firebase_admin import auth
             
-        decoded_token = auth.verify_id_token(token)
-        user_id = decoded_token.get("uid")
-        if not user_id:
-            raise HTTPException(status_code=401, detail="Invalid token payload")
-        return user_id
-    except ImportError:
-        # Fallback: trust the token directly after validation
-        return token
-    except Exception as e:
-        print(f"Firebase token verification failed: {e}")
-        raise HTTPException(status_code=401, detail="Unauthorized")
+            if not firebase_admin._apps:
+                firebase_admin.initialize_app()
+                
+            decoded_token = auth.verify_id_token(token)
+            user_id = decoded_token.get("uid")
+            if not user_id:
+                raise HTTPException(status_code=401, detail="Invalid token payload")
+        except ImportError:
+            # Fallback: trust the token directly after validation
+            user_id = token
+        except Exception as e:
+            print(f"Firebase token verification failed: {e}")
+            raise HTTPException(status_code=401, detail="Unauthorized")
+
+    # Check user blocklist
+    if db_pipeline.is_entity_blocked(user_id):
+        raise HTTPException(status_code=403, detail="This account has been permanently blocked due to a safety violation.")
+
+    return user_id
