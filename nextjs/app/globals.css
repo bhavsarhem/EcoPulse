@@ -115,3 +115,76 @@ body::-webkit-scrollbar {
     transform: translateY(-5vh) translateX(-50px) rotate(360deg);
   }
 }
+
+/* SweetAlert2 Theme Overrides */
+.swal2-popup {
+  background-color: var(--color-bg-secondary) !important;
+  color: var(--color-text-primary) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: 1.5rem !important; /* rounded-3xl */
+  font-family: var(--font-dm-sans), sans-serif !important;
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1) !important;
+}
+
+.swal2-title {
+  color: var(--color-text-primary) !important;
+  font-family: var(--font-syne), sans-serif !important;
+  font-weight: 800 !important;
+}
+
+.swal2-html-container {
+  color: var(--color-text-secondary) !important;
+  font-size: 0.875rem !important; /* text-sm */
+  line-height: 1.25rem !important;
+}
+
+.swal2-confirm {
+  background-color: var(--color-accent-primary) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  border-radius: 9999px !important; /* rounded-full */
+  padding: 0.625rem 1.5rem !important;
+  font-size: 0.875rem !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.swal2-confirm:hover {
+  opacity: 0.9 !important;
+}
+
+.swal2-cancel {
+  background-color: var(--color-bg-tertiary) !important;
+  color: var(--color-text-primary) !important;
+  font-weight: 600 !important;
+  border-radius: 9999px !important;
+  padding: 0.625rem 1.5rem !important;
+  font-size: 0.875rem !important;
+  border: 1px solid var(--color-border) !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.swal2-cancel:hover {
+  background-color: var(--color-bg-primary) !important;
+}
+
+.swal2-actions {
+  gap: 0.75rem !important;
+}
+
+.swal2-icon.swal2-warning {
+  border-color: var(--color-warning) !important;
+  color: var(--color-warning) !important;
+}
+.swal2-icon.swal2-error {
+  border-color: var(--color-danger) !important;
+  color: var(--color-danger) !important;
+}
+.swal2-icon.swal2-success {
+  border-color: var(--color-success) !important;
+  color: var(--color-success) !important;
+}
+.swal2-icon.swal2-info {
+  border-color: var(--color-accent-secondary) !important;
+  color: var(--color-accent-secondary) !important;
+}

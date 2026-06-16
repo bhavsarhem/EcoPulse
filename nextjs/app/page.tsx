@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Leaf, Sparkles, ShieldCheck, Heart, Activity, Utensils, Bike, Lightbulb } from "lucide-react";
-import { HeaderButton, HeroButton } from "@/components/HeaderActions";
+import { HeaderButton, HeroButton, ThemeToggle } from "@/components/HeaderActions";
 import CarbonEstimator from "@/components/CarbonEstimator";
 import CursorGlow from "@/components/CursorGlow";
 
@@ -33,10 +33,11 @@ export default function Home() {
             EcoPulse
           </span>
         </div>
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4 md:gap-6">
           <a href="#estimator" className="text-xs font-semibold text-text-secondary hover:text-text-primary hover:underline transition-all">
             Estimator
           </a>
+          <ThemeToggle />
           <HeaderButton />
         </div>
       </header>

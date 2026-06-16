@@ -2,7 +2,22 @@
 
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Sun, Moon } from "lucide-react";
+import { useTheme } from "@/hooks/useTheme";
+
+export function ThemeToggle() {
+  const { toggleTheme, isDark } = useTheme();
+
+  return (
+    <button
+      onClick={toggleTheme}
+      aria-label="Toggle Color Theme"
+      className="p-2.5 rounded-full border border-border bg-bg-secondary hover:bg-bg-tertiary transition-all text-text-primary flex items-center justify-center shrink-0"
+    >
+      {isDark ? <Sun className="w-4 h-4 text-warning" /> : <Moon className="w-4 h-4 text-accent-primary" />}
+    </button>
+  );
+}
 
 export function HeaderButton() {
   const { data: session, status } = useSession();
