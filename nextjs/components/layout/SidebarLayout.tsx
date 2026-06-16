@@ -113,6 +113,7 @@ export default function SidebarLayout({ children, session }: SidebarLayoutProps)
 
             {/* User details */}
             <div className="flex items-center gap-3 p-4 border border-border rounded-2xl bg-bg-secondary">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={session?.user?.image || "https://api.dicebear.com/7.x/identicon/svg?seed=user"}
                 alt="Profile Avatar"
@@ -190,6 +191,7 @@ export default function SidebarLayout({ children, session }: SidebarLayoutProps)
 
           {/* Profile Section */}
           <div className="flex items-center gap-3 p-3 border border-border rounded-xl bg-bg-primary/50 overflow-hidden">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={session?.user?.image || "https://api.dicebear.com/7.x/identicon/svg?seed=user"}
               alt="Avatar"

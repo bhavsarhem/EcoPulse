@@ -2,6 +2,7 @@
 
 import { signIn } from "next-auth/react";
 import { Leaf, Sparkles } from "lucide-react";
+import Link from "next/link";
 
 export default function LoginPage() {
   const handleGoogleLogin = () => {
@@ -67,7 +68,16 @@ export default function LoginPage() {
           Continue with Google
         </button>
 
-        <div className="mt-8 pt-6 border-t border-border/50 flex items-center justify-center gap-1.5 text-xs text-text-secondary font-mono">
+        <div className="mt-4 text-center">
+          <Link
+            href="/"
+            className="text-xs font-semibold text-text-secondary hover:text-accent-primary transition-colors inline-flex items-center gap-1"
+          >
+            ← Back to Home
+          </Link>
+        </div>
+
+        <div className="mt-6 pt-6 border-t border-border/50 flex items-center justify-center gap-1.5 text-xs text-text-secondary font-mono">
           <Sparkles className="w-3.5 h-3.5 text-accent-secondary" />
           Secured with Google OAuth 2.0
         </div>

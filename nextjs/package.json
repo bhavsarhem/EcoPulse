@@ -14,7 +14,8 @@
     "next-auth": "^4.24.14",
     "react": "19.0.0-rc-66855b96-20241106",
     "react-dom": "19.0.0-rc-66855b96-20241106",
-    "recharts": "^3.8.1"
+    "recharts": "^3.8.1",
+    "sweetalert2": "^11.26.25"
   },
   "devDependencies": {
     "@types/node": "^20",

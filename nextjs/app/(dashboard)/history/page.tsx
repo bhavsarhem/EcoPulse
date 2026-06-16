@@ -1,4 +1,5 @@
 "use client";
+import Swal from "sweetalert2";
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
@@ -60,7 +61,18 @@ export default function HistoryPage() {
   };
 
   const handleDelete = async (scanId: string) => {
-    if (!confirm("Are you sure you want to delete this scan record?")) return;
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to permanently delete this scan record?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#EF4444",
+      cancelButtonColor: "#6B7280",
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel"
+    });
+    
+    if (!result.isConfirmed) return;
     
     try {
       const res = await fetch(`/api/history?scanId=${scanId}`, {
@@ -70,8 +82,21 @@ export default function HistoryPage() {
       
       // Update local state
       setScans((prev) => prev.filter((s) => s.scan_id !== scanId));
+      
+      Swal.fire({
+        title: "Deleted!",
+        text: "Scan record has been deleted.",
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false
+      });
     } catch (err: any) {
-      alert("Error deleting record: " + err.message);
+      Swal.fire({
+        title: "Error",
+        text: "Error deleting record: " + err.message,
+        icon: "error",
+        confirmButtonColor: "#EF4444"
+      });
     }
   };
 

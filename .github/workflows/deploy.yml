@@ -6,8 +6,8 @@ on:
       - main
 
 env:
-  PROJECT_ID: ecopulse-498916
-  REGION: us-central1
+  PROJECT_ID: ecopulse-499310
+  REGION: asia-south1
 
 jobs:
   deploy-backend:
@@ -52,7 +52,7 @@ jobs:
 
       - name: Deploy Frontend to Cloud Run
         run: |
-          gcloud run deploy ecopulse-frontend \
+          gcloud run deploy ecopulse \
             --source ./nextjs \
             --region ${{ env.REGION }} \
             --project ${{ env.PROJECT_ID }} \

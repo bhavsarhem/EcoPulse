@@ -1,4 +1,5 @@
 "use client";
+import Swal from "sweetalert2";
 
 import { useSession, signOut } from "next-auth/react";
 import { useTheme } from "@/hooks/useTheme";
@@ -42,7 +43,12 @@ export default function SettingsPage() {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
     } catch (err: any) {
-      alert("Export failed: " + err.message);
+      Swal.fire({
+        title: "Export Failed",
+        text: err.message,
+        icon: "error",
+        confirmButtonColor: "#EF4444"
+      });
     } finally {
       setLoadingExport(false);
     }
@@ -50,11 +56,18 @@ export default function SettingsPage() {
 
   // Delete all user scans (simulate account deletion)
   const handleDeleteAccount = async () => {
-    const confirmation1 = confirm("WARNING: This will permanently delete your entire scan history from EcoPulse. Are you sure?");
-    if (!confirmation1) return;
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "WARNING: This will permanently delete your entire scan history from EcoPulse. This action is IRREVERSIBLE.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#EF4444",
+      cancelButtonColor: "#6B7280",
+      confirmButtonText: "Yes, purge it!",
+      cancelButtonText: "Cancel"
+    });
     
-    const confirmation2 = confirm("Please confirm one more time. This action is IRREVERSIBLE.");
-    if (!confirmation2) return;
+    if (!result.isConfirmed) return;
 
     setLoadingDelete(true);
     try {
@@ -67,10 +80,20 @@ export default function SettingsPage() {
         await fetch(`/api/history?scanId=${scan.scan_id}`, { method: "DELETE" });
       }
 
-      alert("Your scan history has been successfully purged. Signing you out.");
+      await Swal.fire({
+        title: "Purged!",
+        text: "Your scan history has been successfully purged. Signing you out.",
+        icon: "success",
+        confirmButtonColor: "#10B981"
+      });
       signOut({ callbackUrl: "/login" });
     } catch (err: any) {
-      alert("Purge failed: " + err.message);
+      Swal.fire({
+        title: "Purge Failed",
+        text: err.message,
+        icon: "error",
+        confirmButtonColor: "#EF4444"
+      });
     } finally {
       setLoadingDelete(false);
     }

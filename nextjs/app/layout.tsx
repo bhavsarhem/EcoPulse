@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Syne, DM_Sans, JetBrains_Mono } from "next/font/google";
 import { Providers } from "@/components/Providers";
 import "./globals.css";
+import "sweetalert2/dist/sweetalert2.min.css";
 
 const syne = Syne({
   subsets: ["latin"],

@@ -53,6 +53,7 @@ function useAnimatedNumber(targetValue: number, duration: number = 350) {
     
     animationFrameId = requestAnimationFrame(step);
     return () => cancelAnimationFrame(animationFrameId);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [targetValue]);
   
   return currentValue;

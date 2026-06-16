@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useCamera } from "@/hooks/useCamera";
 import { useScan } from "@/hooks/useScan";
+import Swal from "sweetalert2";
 import {
   Camera,
   UploadCloud,
@@ -44,6 +45,31 @@ export default function ScanPage() {
     startScan,
     clearResult
   } = useScan();
+
+  // Show SweetAlert when scanError occurs
+  useEffect(() => {
+    if (scanError) {
+      Swal.fire({
+        title: "Scanning Failed",
+        text: "Model limit reached, please try again after some time.",
+        icon: "error",
+        showCancelButton: true,
+        confirmButtonColor: "#10B981",
+        cancelButtonColor: "#EF4444",
+        confirmButtonText: "Retry",
+        cancelButtonText: "Cancel",
+      }).then((result) => {
+        if (result.isConfirmed && imagePreview) {
+          if (uploadFile) {
+            startScan(uploadFile, scanType, token);
+          } else {
+            startScan(imagePreview, scanType, token);
+          }
+        }
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scanError]);
 
   // Handle stream assignment to video element
   useEffect(() => {
@@ -217,6 +243,7 @@ export default function ScanPage() {
             ) : imagePreview ? (
               // Image preview
               <div className="absolute inset-0 flex items-center justify-center bg-black/5">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={imagePreview}
                   alt="Scanned Preview"

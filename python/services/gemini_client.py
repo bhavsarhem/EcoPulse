@@ -177,8 +177,11 @@ class GeminiClient:
             return final_data
             
         except Exception as e:
-            print(f"Gemini live call error: {e}. Falling back to mock data.")
-            return self._generate_mock_response(scan_type)
+            print(f"Gemini live call error: {e}.")
+            if self.mock_mode:
+                print("Falling back to mock data.")
+                return self._generate_mock_response(scan_type)
+            raise e
 
     def _generate_mock_response(self, scan_type: str) -> Dict[str, Any]:
         """Generates realistic responses for local execution/testing."""
